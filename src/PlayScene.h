@@ -3,8 +3,7 @@
 #define __PLAY_SCENE__
 
 #include "Scene.h"
-#include "Plane.h"
-#include "ThermalDetonator.h"
+#include "LootCrate.h"
 #include "Button.h"
 #include "Label.h"
 
@@ -28,8 +27,7 @@ private:
 	
 	glm::vec2 m_mousePosition;
 
-	Plane* m_pPlaneSprite;
-	ThermalDetonator* m_pDetonator;
+	LootCrate* m_pLootCrate;
 	bool m_playerFacingRight;
 
 	glm::vec2 StormTrooperPos;

@@ -76,6 +76,9 @@ void PlayScene::start()
 	TrianglePosX = 300.0f;
 	TrianglePosY = 400.0f;
 
+	m_pLootCrate = new LootCrate();
+	addChild(m_pLootCrate);
+
 	SetTriangle();
 	
 	// Back Button
@@ -121,7 +124,7 @@ void PlayScene::start()
 
 	/* Instructions Label */
 	m_pInstructionsLabel = new Label("Press the backtick (`) character to toggle Debug View", "Consolas", 20.0f, { 255, 255, 255, 255 });
-	m_pInstructionsLabel->getTransform()->position = glm::vec2(Config::SCREEN_WIDTH * 0.5f, 500.0f);
+	m_pInstructionsLabel->getTransform()->position = glm::vec2(Config::SCREEN_WIDTH * 0.5f, 550.0f);
 
 	addChild(m_pInstructionsLabel);
 }
@@ -194,4 +197,8 @@ void PlayScene::SetTriangle()
 	Triangle[0] = glm::vec2(TrianglePosX, TrianglePosY);
 	Triangle[1] = glm::vec2(TrianglePosX + TriangleWidth, TrianglePosY);
 	Triangle[2] = glm::vec2(TrianglePosX, TrianglePosY - TriangleHeight);
+
+	float theta = atan(TriangleWidth / TriangleHeight);
+	m_pLootCrate->Rotation = glm::degrees(theta);
+	m_pLootCrate->getTransform()->position = glm::vec2(Triangle[2].x, Triangle[2].y);
 }
