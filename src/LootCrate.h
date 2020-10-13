@@ -21,10 +21,9 @@ public:
 
 	glm::vec2 Gravity = glm::vec2(0, 9.8f);
 
-	bool calculateTheta;
 	float Speed;
 	float pixelsPerMeter;
-	float throwAngle;
+	float Mass;
 
 	float Rotation = 0.0f;
 

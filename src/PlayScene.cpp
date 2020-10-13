@@ -71,12 +71,14 @@ void PlayScene::start()
 	// Set GUI Title
 	m_guiTitle = "Play Scene";
 
+	// Default values for triangle width, height, X, & Y
 	TriangleWidth = 100.0f;
 	TriangleHeight = 100.0f;
 	TrianglePosX = 300.0f;
 	TrianglePosY = 400.0f;
 
 	m_pLootCrate = new LootCrate();
+	m_pLootCrate->Mass = 12.8f; // 12.8 kg mass
 	addChild(m_pLootCrate);
 
 	SetTriangle();
@@ -145,7 +147,7 @@ void PlayScene::GUI_Function()
 	if (ImGui::SliderFloat("Ramp Width", &TriangleWidth, 0.0f, 400.0f))
 		SetTriangle();
 
-	if (ImGui::SliderFloat("Ramp Height", &TriangleHeight, 125.0f, 300.0f))
+	if (ImGui::SliderFloat("Ramp Height", &TriangleHeight, 0.0f, 300.0f))
 		SetTriangle();
 
 	/*if (ImGui::Button("Play"))
@@ -198,7 +200,9 @@ void PlayScene::SetTriangle()
 	Triangle[1] = glm::vec2(TrianglePosX + TriangleWidth, TrianglePosY);
 	Triangle[2] = glm::vec2(TrianglePosX, TrianglePosY - TriangleHeight);
 
-	float theta = atan(TriangleWidth / TriangleHeight);
+	float c = sqrt(TriangleWidth * TriangleWidth + TriangleHeight + TriangleHeight);
+	float theta = atan(TriangleHeight / c);
 	m_pLootCrate->Rotation = glm::degrees(theta);
-	m_pLootCrate->getTransform()->position = glm::vec2(Triangle[2].x, Triangle[2].y);
+	m_pLootCrate->getTransform()->position = glm::vec2(Triangle[2].x, Triangle[2].y - 35.0f);
+	std::cout << "THETA: " << glm::degrees(theta) << "\n";
 }
