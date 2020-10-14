@@ -39,6 +39,7 @@ private:
 	float TrianglePosX;
 	float TrianglePosY;
 	float Friction;
+	float Theta;
 
 	bool AddFriction = false;
 
@@ -53,6 +54,10 @@ private:
 	Label* VelocityLabel{};
 	Label* AccelerationLabel{};
 	Label* ForceLabel{};
+	Label* ThetaLabel{};
+
+	void SetText();
+	void CreateLabels();
 
 	void SetTriangle();
 };
