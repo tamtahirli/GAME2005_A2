@@ -54,7 +54,6 @@ void LootCrate::move()
 {
 	float deltaTime = 1.0f / 60.0f;
 
-	getRigidBody()->acceleration = Gravity;
 	getRigidBody()->velocity += getRigidBody()->acceleration * deltaTime;
 	getTransform()->position += getRigidBody()->velocity * deltaTime * pixelsPerMeter;
 

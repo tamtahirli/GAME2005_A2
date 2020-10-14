@@ -19,7 +19,7 @@ public:
 
 	bool doesUpdate = false; 
 
-	glm::vec2 Gravity = glm::vec2(0, 9.8f);
+	float Gravity = 9.8f;
 
 	float Speed;
 	float pixelsPerMeter;

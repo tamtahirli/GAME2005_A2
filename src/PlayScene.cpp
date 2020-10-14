@@ -79,6 +79,8 @@ void PlayScene::start()
 
 	m_pLootCrate = new LootCrate();
 	m_pLootCrate->Mass = 12.8f; // 12.8 kg mass
+	m_pLootCrate->pixelsPerMeter = 1.0f; // 1.0 PPM
+	m_pLootCrate->Gravity = 9.8f;
 	addChild(m_pLootCrate);
 
 	SetTriangle();
@@ -139,16 +141,40 @@ void PlayScene::GUI_Function()
 	if (ImGui::Button("Play"))
 	{
 		std::cout << "You clicked play!";
+		std::cout << "Calculate acceleration:" << "\n";
+
+		float hypotenuse = sqrt(TriangleWidth * TriangleWidth + TriangleHeight * TriangleHeight);
+		float theta = asin(TriangleHeight / hypotenuse);
+
+		std::cout << "Width: " << TriangleWidth << " Height: " << TriangleHeight << " HYP: " << hypotenuse << " Theta: " << glm::degrees(theta) << "\n";
+
+		float xAcceleration = m_pLootCrate->Mass * m_pLootCrate->Gravity * sin(theta);
+		std::cout << "Acceleration X = g*sin(theta): " << xAcceleration << "\n";
+
+		float yAcceleration = m_pLootCrate->Mass * m_pLootCrate->Gravity * cos(theta);
+		std::cout << "Acceleration Y = mg*cos(theta): " << yAcceleration << "\n";
+
+		m_pLootCrate->getRigidBody()->acceleration = glm::vec2(xAcceleration, yAcceleration);
+		m_pLootCrate->doesUpdate = true;
+	}
+
+	if (ImGui::Button("Reset"))
+	{
+		m_pLootCrate->doesUpdate = false;
+		SetTriangle();
+		m_pLootCrate->getRigidBody()->velocity = glm::vec2(0.0f, 0.0f);
+		m_pLootCrate->getRigidBody()->acceleration = glm::vec2(0.0f, 0.0f);
 	}
 
 	if (ImGui::SliderFloat("Position", &TrianglePosX, 0.0f, Config::SCREEN_WIDTH))
 		SetTriangle();
 
+	if (ImGui::SliderFloat("Ramp Height", &TriangleHeight, 0.0f, 300.0f))
+		SetTriangle();
+
 	if (ImGui::SliderFloat("Ramp Width", &TriangleWidth, 0.0f, 400.0f))
 		SetTriangle();
 
-	if (ImGui::SliderFloat("Ramp Height", &TriangleHeight, 0.0f, 300.0f))
-		SetTriangle();
 
 	/*if (ImGui::Button("Play"))
 	{
@@ -200,9 +226,9 @@ void PlayScene::SetTriangle()
 	Triangle[1] = glm::vec2(TrianglePosX + TriangleWidth, TrianglePosY);
 	Triangle[2] = glm::vec2(TrianglePosX, TrianglePosY - TriangleHeight);
 
-	float c = sqrt(TriangleWidth * TriangleWidth + TriangleHeight + TriangleHeight);
-	float theta = atan(TriangleHeight / c);
+	float hypotenuse = sqrt(TriangleWidth * TriangleWidth + TriangleHeight * TriangleHeight);
+	float theta = asin(TriangleHeight / hypotenuse);
+	std::cout << "First Theta: " << glm::degrees(theta) << "\n";
 	m_pLootCrate->Rotation = glm::degrees(theta);
-	m_pLootCrate->getTransform()->position = glm::vec2(Triangle[2].x, Triangle[2].y - 35.0f);
-	std::cout << "THETA: " << glm::degrees(theta) << "\n";
+	m_pLootCrate->getTransform()->position = glm::vec2(Triangle[2].x, Triangle[2].y - 35.0f); 
 }
