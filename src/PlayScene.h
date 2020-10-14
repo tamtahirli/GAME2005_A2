@@ -38,6 +38,9 @@ private:
 	float TriangleHeight;
 	float TrianglePosX;
 	float TrianglePosY;
+	float Friction;
+
+	bool AddFriction = false;
 
 	// UI Items
 	Button* m_pBackButton;

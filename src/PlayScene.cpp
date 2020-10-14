@@ -127,7 +127,7 @@ void PlayScene::start()
 	addChild(m_pNextButton);
 
 	/* Instructions Label */
-	m_pInstructionsLabel = new Label("Press the backtick (`) character to toggle Debug View", "Consolas", 20.0f, { 255, 255, 255, 255 });
+	m_pInstructionsLabel = new Label("Press the grave accent (`) to toggle Debug View", "Consolas", 20.0f, { 255, 255, 255, 255 });
 	m_pInstructionsLabel->getTransform()->position = glm::vec2(Config::SCREEN_WIDTH * 0.5f, 550.0f);
 
 	addChild(m_pInstructionsLabel);
@@ -148,11 +148,13 @@ void PlayScene::GUI_Function()
 
 		std::cout << "Width: " << TriangleWidth << " Height: " << TriangleHeight << " HYP: " << hypotenuse << " Theta: " << glm::degrees(theta) << "\n";
 
-		float xAcceleration = m_pLootCrate->Mass * m_pLootCrate->Gravity * sin(theta);
-		std::cout << "Acceleration X = g*sin(theta): " << xAcceleration << "\n";
+		std::cout << "SinTheta = " << sin(theta) << " CosTheta = " << cos(theta) << "\n";
 
-		float yAcceleration = m_pLootCrate->Mass * m_pLootCrate->Gravity * cos(theta);
-		std::cout << "Acceleration Y = mg*cos(theta): " << yAcceleration << "\n";
+		float xAcceleration = m_pLootCrate->Mass * m_pLootCrate->Gravity * cos(theta);
+		std::cout << "Acceleration X = mgcos(theta): " << xAcceleration << "\n";
+
+		float yAcceleration = m_pLootCrate->Mass * m_pLootCrate->Gravity * sin(theta);
+		std::cout << "Acceleration Y = mgsin(theta): " << yAcceleration << "\n";
 
 		m_pLootCrate->getRigidBody()->acceleration = glm::vec2(xAcceleration, yAcceleration);
 		m_pLootCrate->doesUpdate = true;
@@ -165,16 +167,21 @@ void PlayScene::GUI_Function()
 		m_pLootCrate->getRigidBody()->velocity = glm::vec2(0.0f, 0.0f);
 		m_pLootCrate->getRigidBody()->acceleration = glm::vec2(0.0f, 0.0f);
 	}
-
-	if (ImGui::SliderFloat("Position", &TrianglePosX, 0.0f, Config::SCREEN_WIDTH))
+	if (ImGui::SliderFloat("Position", &TrianglePosX, 0.0f, Config::SCREEN_WIDTH) && !m_pLootCrate->doesUpdate)
 		SetTriangle();
 
-	if (ImGui::SliderFloat("Ramp Height", &TriangleHeight, 0.0f, 300.0f))
+	if (ImGui::SliderFloat("Ramp Height", &TriangleHeight, 0.0f, 300.0f) && !m_pLootCrate->doesUpdate)
 		SetTriangle();
 
-	if (ImGui::SliderFloat("Ramp Width", &TriangleWidth, 0.0f, 400.0f))
+	if (ImGui::SliderFloat("Ramp Width", &TriangleWidth, 0.0f, 400.0f) && !m_pLootCrate->doesUpdate)
 		SetTriangle();
 
+	ImGui::Checkbox("Add friction?", &AddFriction);
+
+	if (AddFriction)
+	{
+		ImGui::SliderFloat("Friction", &Friction, 0.0f, 2.0f);
+	}
 
 	/*if (ImGui::Button("Play"))
 	{
@@ -228,7 +235,7 @@ void PlayScene::SetTriangle()
 
 	float hypotenuse = sqrt(TriangleWidth * TriangleWidth + TriangleHeight * TriangleHeight);
 	float theta = asin(TriangleHeight / hypotenuse);
-	std::cout << "First Theta: " << glm::degrees(theta) << "\n";
+	//std::cout << "Moved Theta: " << glm::degrees(theta) << "\n";
 	m_pLootCrate->Rotation = glm::degrees(theta);
 	m_pLootCrate->getTransform()->position = glm::vec2(Triangle[2].x, Triangle[2].y - 35.0f); 
 }
