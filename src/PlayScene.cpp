@@ -24,6 +24,9 @@ void PlayScene::draw()
 	Util::DrawLine(Triangle[1], Triangle[2]);
 	Util::DrawLine(Triangle[2], Triangle[0]);
 
+	if (m_pLootCrate->doesUpdate)
+		SetText();
+
 	drawDisplayList();
 	SDL_SetRenderDrawColor(Renderer::Instance()->getRenderer(), 255, 255, 255, 255);
 
@@ -82,6 +85,8 @@ void PlayScene::start()
 	m_pLootCrate->pixelsPerMeter = 1.0f; // 1.0 PPM
 	m_pLootCrate->Gravity = 9.8f;
 	addChild(m_pLootCrate);
+
+	CreateLabels();
 
 	SetTriangle();
 	
@@ -143,18 +148,22 @@ void PlayScene::GUI_Function()
 		std::cout << "You clicked play!";
 		std::cout << "Calculate acceleration:" << "\n";
 
-		float hypotenuse = sqrt(TriangleWidth * TriangleWidth + TriangleHeight * TriangleHeight);
-		float theta = asin(TriangleHeight / hypotenuse);
+		std::cout << "Width: " << TriangleWidth << " Height: " << TriangleHeight << " HYP: " << sqrt(TriangleWidth * TriangleWidth + TriangleHeight * TriangleHeight) << " Theta: " << glm::degrees(Theta) << "\n";
 
-		std::cout << "Width: " << TriangleWidth << " Height: " << TriangleHeight << " HYP: " << hypotenuse << " Theta: " << glm::degrees(theta) << "\n";
+		std::cout << "SinTheta = " << sin(Theta) << " CosTheta = " << cos(Theta) << "\n";
 
-		std::cout << "SinTheta = " << sin(theta) << " CosTheta = " << cos(theta) << "\n";
-
-		float xAcceleration = m_pLootCrate->Mass * m_pLootCrate->Gravity * cos(theta);
+		float xAcceleration = m_pLootCrate->Mass * m_pLootCrate->Gravity * cos(Theta);
 		std::cout << "Acceleration X = mgcos(theta): " << xAcceleration << "\n";
 
-		float yAcceleration = m_pLootCrate->Mass * m_pLootCrate->Gravity * sin(theta);
+		float yAcceleration = m_pLootCrate->Mass * m_pLootCrate->Gravity * sin(Theta);
 		std::cout << "Acceleration Y = mgsin(theta): " << yAcceleration << "\n";
+
+		if (AddFriction)
+		{
+			xAcceleration = m_pLootCrate->Mass * m_pLootCrate->Gravity * cos(Theta) - Friction * m_pLootCrate->Mass * m_pLootCrate->Gravity * cos(Theta);
+			yAcceleration = m_pLootCrate->Mass * m_pLootCrate->Gravity * sin(Theta) - Friction * m_pLootCrate->Mass * m_pLootCrate->Gravity * sin(Theta);
+			std::cout << "DEBUG: X: " << xAcceleration << " Y: " << yAcceleration << "\n";
+		}
 
 		m_pLootCrate->getRigidBody()->acceleration = glm::vec2(xAcceleration, yAcceleration);
 		m_pLootCrate->doesUpdate = true;
@@ -166,7 +175,9 @@ void PlayScene::GUI_Function()
 		SetTriangle();
 		m_pLootCrate->getRigidBody()->velocity = glm::vec2(0.0f, 0.0f);
 		m_pLootCrate->getRigidBody()->acceleration = glm::vec2(0.0f, 0.0f);
+		SetText();
 	}
+
 	if (ImGui::SliderFloat("Position", &TrianglePosX, 0.0f, Config::SCREEN_WIDTH) && !m_pLootCrate->doesUpdate)
 		SetTriangle();
 
@@ -180,17 +191,17 @@ void PlayScene::GUI_Function()
 
 	if (AddFriction)
 	{
-		ImGui::SliderFloat("Friction", &Friction, 0.0f, 2.0f);
+		ImGui::SliderFloat("Friction", &Friction, 0.0f, 0.999f);
 	}
 
 	/*if (ImGui::Button("Play"))
 	{
 		glm::vec2 DegreeToVector;
-		if (m_pDetonator->calculateTheta)
+		if (m_pLootCrate->calculateTheta)
 		{
-			glm::vec2 distance = StormTrooperPos.x - m_pDetonator->getTransform()->position;
+			glm::vec2 distance = StormTrooperPos.x - m_pLootCrate->getTransform()->position;
 
-			float gravityByDistance = m_pDetonator->Gravity.y * distance.x;
+			float gravityByDistance = m_pLootCrate->Gravity.y * distance.x;
 			float Equation = gravityByDistance / (Speed * Speed);
 			float theta = 0.5 * glm::degrees(asin(Equation));
 
@@ -201,20 +212,20 @@ void PlayScene::GUI_Function()
 
 			DegreeToVector = glm::vec2(cosTheta, -sinTheta);
 		}
-		else DegreeToVector = glm::vec2(cos(m_pDetonator->throwAngle), -sin(m_pDetonator->throwAngle));
+		else DegreeToVector = glm::vec2(cos(m_pLootCrate->throwAngle), -sin(m_pLootCrate->throwAngle));
 
 		std::cout << "Degree to vector: " << DegreeToVector.x << " y: " << DegreeToVector.y << "\n";
-		m_pDetonator->getRigidBody()->velocity = DegreeToVector * Speed;
-		m_pDetonator->doesUpdate = true;
+		m_pLootCrate->getRigidBody()->velocity = DegreeToVector * Speed;
+		m_pLootCrate->doesUpdate = true;
 		
 	}
 
 	if (ImGui::Button("Reset"))
 	{
-		m_pDetonator->doesUpdate = false;
-		m_pDetonator->getTransform()->position = glm::vec2(125.0f, 400.0f);
-		m_pDetonator->getRigidBody()->velocity = glm::vec2(0.0f, 0.0f);
-		m_pDetonator->getRigidBody()->acceleration = glm::vec2(0.0f, 0.0f);
+		m_pLootCrate->doesUpdate = false;
+		m_pLootCrate->getTransform()->position = glm::vec2(125.0f, 400.0f);
+		m_pLootCrate->getRigidBody()->velocity = glm::vec2(0.0f, 0.0f);
+		m_pLootCrate->getRigidBody()->acceleration = glm::vec2(0.0f, 0.0f);
 
 		SetText();
 	}*/
@@ -234,8 +245,67 @@ void PlayScene::SetTriangle()
 	Triangle[2] = glm::vec2(TrianglePosX, TrianglePosY - TriangleHeight);
 
 	float hypotenuse = sqrt(TriangleWidth * TriangleWidth + TriangleHeight * TriangleHeight);
-	float theta = asin(TriangleHeight / hypotenuse);
+	Theta = asin(TriangleHeight / hypotenuse);
 	//std::cout << "Moved Theta: " << glm::degrees(theta) << "\n";
-	m_pLootCrate->Rotation = glm::degrees(theta);
+	m_pLootCrate->Rotation = glm::degrees(Theta);
 	m_pLootCrate->getTransform()->position = glm::vec2(Triangle[2].x, Triangle[2].y - 35.0f); 
+	SetText();
+}
+
+void PlayScene::SetText()
+{
+	std::string Text = "";
+	Text = "Mass: " + std::to_string(m_pLootCrate->Mass);
+	MassLabel->setText(Text);
+
+	Text = "Position (x, y): (" + std::to_string(m_pLootCrate->getTransform()->position.x) + ", " + std::to_string(m_pLootCrate->getTransform()->position.y) + ")";
+	PositionLabel->setText(Text);
+
+	Text = "Velocity: " + std::to_string(Util::magnitude(m_pLootCrate->getRigidBody()->velocity));
+	VelocityLabel->setText(Text);
+
+	Text = "Acceleration: " + std::to_string(Util::magnitude(m_pLootCrate->getRigidBody()->acceleration));
+	AccelerationLabel->setText(Text);
+
+	Text = "Force: " + std::to_string(Util::magnitude(m_pLootCrate->Force));
+	ForceLabel->setText(Text);
+
+	Text = "Theta: " + std::to_string(glm::degrees(Theta));
+	ThetaLabel->setText(Text);
+}
+
+void PlayScene::CreateLabels()
+{
+	const SDL_Color green = { 0, 100, 0, 255 };
+
+	std::string Text = "";
+	Text = "Mass: " + std::to_string(m_pLootCrate->Mass);
+	MassLabel = new Label(Text, "Consolas", 15, green, glm::vec2(100.0f, 25.0f));
+	MassLabel->setParent(this);
+	addChild(MassLabel);
+
+	Text = "Position (x, y): (" + std::to_string(m_pLootCrate->getTransform()->position.x) + ", " + std::to_string(m_pLootCrate->getTransform()->position.y) + ")";
+	PositionLabel = new Label(Text, "Consolas", 15, green, glm::vec2(175.0f, 100.0f));
+	PositionLabel->setParent(this);
+	addChild(PositionLabel);
+
+	Text = "Velocity: " + std::to_string(Util::magnitude(m_pLootCrate->getRigidBody()->velocity));
+	VelocityLabel = new Label(Text, "Consolas", 15, green, glm::vec2(100.0f, 50.0f));
+	VelocityLabel->setParent(this);
+	addChild(VelocityLabel);
+
+	Text = "Acceleration: " + std::to_string(Util::magnitude(m_pLootCrate->getRigidBody()->acceleration));
+	AccelerationLabel = new Label(Text, "Consolas", 15, green, glm::vec2(100.0f, 75.0f));
+	AccelerationLabel->setParent(this);
+	addChild(AccelerationLabel);
+
+	Text = "Force: " + std::to_string(Util::magnitude(m_pLootCrate->Force));
+	ForceLabel = new Label(Text, "Consolas", 15, green, glm::vec2(100.0f, 125.0f));
+	ForceLabel->setParent(this);
+	addChild(ForceLabel);
+
+	Text = "Theta: " + std::to_string(glm::degrees(Theta));
+	ThetaLabel = new Label(Text, "Consolas", 15, green, glm::vec2(100.0f, 150.0f));
+	ThetaLabel->setParent(this);
+	addChild(ThetaLabel);
 }
