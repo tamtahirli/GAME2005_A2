@@ -145,26 +145,34 @@ void PlayScene::GUI_Function()
 	ImGui::Begin("Edit Variables", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar);
 	if (ImGui::Button("Play"))
 	{
-		std::cout << "You clicked play!";
-		std::cout << "Calculate acceleration:" << "\n";
+		//std::cout << "You clicked play!";
+		//std::cout << "Calculate acceleration:" << "\n";
 
-		std::cout << "Width: " << TriangleWidth << " Height: " << TriangleHeight << " HYP: " << sqrt(TriangleWidth * TriangleWidth + TriangleHeight * TriangleHeight) << " Theta: " << glm::degrees(Theta) << "\n";
+		//std::cout << "Width: " << TriangleWidth << " Height: " << TriangleHeight << " HYP: " << sqrt(TriangleWidth * TriangleWidth + TriangleHeight * TriangleHeight) << " Theta: " << glm::degrees(Theta) << "\n";
 
-		std::cout << "SinTheta = " << sin(Theta) << " CosTheta = " << cos(Theta) << "\n";
+		//std::cout << "SinTheta = " << sin(Theta) << " CosTheta = " << cos(Theta) << "\n";
 
-		float xAcceleration = m_pLootCrate->Mass * m_pLootCrate->Gravity * cos(Theta);
-		std::cout << "Acceleration X = mgcos(theta): " << xAcceleration << "\n";
+		//float xAcceleration = m_pLootCrate->Mass * m_pLootCrate->Gravity * cos(Theta);
+		//std::cout << "Acceleration X = mgcos(theta): " << xAcceleration << "\n";
 
-		float yAcceleration = m_pLootCrate->Mass * m_pLootCrate->Gravity * sin(Theta);
-		std::cout << "Acceleration Y = mgsin(theta): " << yAcceleration << "\n";
+		//float yAcceleration = m_pLootCrate->Mass * m_pLootCrate->Gravity * sin(Theta);
+		//std::cout << "Acceleration Y = mgsin(theta): " << yAcceleration << "\n";
 
-		if (AddFriction)
+		/*if (AddFriction)
 		{
 			xAcceleration = m_pLootCrate->Mass * m_pLootCrate->Gravity * cos(Theta) - Friction * m_pLootCrate->Mass * m_pLootCrate->Gravity * cos(Theta);
 			yAcceleration = m_pLootCrate->Mass * m_pLootCrate->Gravity * sin(Theta) - Friction * m_pLootCrate->Mass * m_pLootCrate->Gravity * sin(Theta);
-			std::cout << "DEBUG: X: " << xAcceleration << " Y: " << yAcceleration << "\n";
-		}
+			//std::cout << "DEBUG: X: " << xAcceleration << " Y: " << yAcceleration << "\n";
+		}*/
 
+		if (!AddFriction) Friction = 0.0f;
+
+		float xAcceleration = 
+			m_pLootCrate->Mass * m_pLootCrate->Gravity * cos(Theta) - Friction * m_pLootCrate->Mass * m_pLootCrate->Gravity * cos(Theta);
+
+		float yAcceleration = 
+			m_pLootCrate->Mass * m_pLootCrate->Gravity * sin(Theta) - Friction * m_pLootCrate->Mass * m_pLootCrate->Gravity * sin(Theta);
+		
 		m_pLootCrate->getRigidBody()->acceleration = glm::vec2(xAcceleration, yAcceleration);
 		m_pLootCrate->doesUpdate = true;
 	}
@@ -246,9 +254,10 @@ void PlayScene::SetTriangle()
 
 	float hypotenuse = sqrt(TriangleWidth * TriangleWidth + TriangleHeight * TriangleHeight);
 	Theta = asin(TriangleHeight / hypotenuse);
-	//std::cout << "Moved Theta: " << glm::degrees(theta) << "\n";
+
 	m_pLootCrate->Rotation = glm::degrees(Theta);
-	m_pLootCrate->getTransform()->position = glm::vec2(Triangle[2].x, Triangle[2].y - 35.0f); 
+	m_pLootCrate->getTransform()->position = glm::vec2(Triangle[2].x + m_pLootCrate->getWidth() / 2.5f, Triangle[2].y - m_pLootCrate->getHeight() / 2.5f);
+
 	SetText();
 }
 
