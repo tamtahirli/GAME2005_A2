@@ -25,6 +25,9 @@ public:
 	float pixelsPerMeter;
 	float Mass;
 
+	float friction;
+	float theta;
+
 	float Rotation = 0.0f;
 
 	glm::vec2 Force;

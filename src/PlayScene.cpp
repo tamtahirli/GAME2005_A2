@@ -23,6 +23,7 @@ void PlayScene::draw()
 	Util::DrawLine(Triangle[0], Triangle[1]);
 	Util::DrawLine(Triangle[1], Triangle[2]);
 	Util::DrawLine(Triangle[2], Triangle[0]);
+	Util::DrawLine(Triangle[0], glm::vec2(Triangle[0].x + 600.0f, Triangle[0].y));
 
 	if (m_pLootCrate->doesUpdate)
 		SetText();
@@ -38,6 +39,34 @@ void PlayScene::draw()
 
 void PlayScene::update()
 {
+	if (m_pLootCrate->doesUpdate)
+	{
+		if (!AddFriction) Friction = 0.0f;
+
+		float xAcceleration =
+			m_pLootCrate->Mass * m_pLootCrate->Gravity * cos(Theta);
+
+		float yAcceleration =
+			m_pLootCrate->Mass * m_pLootCrate->Gravity * sin(Theta);
+
+		if (m_pLootCrate->getTransform()->position.y >= Triangle[1].y - m_pLootCrate->getHeight() / 2)
+		{
+			Theta = 0.0f;
+			yAcceleration = 0.0f;
+			m_pLootCrate->getRigidBody()->velocity.y = 0.0f;
+			m_pLootCrate->Rotation = 0.0f;
+			xAcceleration = -(Friction * m_pLootCrate->Mass * m_pLootCrate->Gravity);
+			if (m_pLootCrate->getRigidBody()->velocity.x <= 0)
+			{
+				xAcceleration = 0.0f;
+				m_pLootCrate->getRigidBody()->velocity.x = 0.0f;
+			}
+		}
+
+
+		m_pLootCrate->getRigidBody()->acceleration = glm::vec2(xAcceleration, yAcceleration);
+	}
+	
 	updateDisplayList();
 }
 
@@ -75,9 +104,9 @@ void PlayScene::start()
 	m_guiTitle = "Play Scene";
 
 	// Default values for triangle width, height, X, & Y
-	TriangleWidth = 100.0f;
-	TriangleHeight = 100.0f;
-	TrianglePosX = 300.0f;
+	TriangleWidth = 400.0f;
+	TriangleHeight = 300.0f;
+	TrianglePosX = 150.0f;
 	TrianglePosY = 400.0f;
 
 	m_pLootCrate = new LootCrate();
@@ -145,35 +174,6 @@ void PlayScene::GUI_Function()
 	ImGui::Begin("Edit Variables", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar);
 	if (ImGui::Button("Play"))
 	{
-		//std::cout << "You clicked play!";
-		//std::cout << "Calculate acceleration:" << "\n";
-
-		//std::cout << "Width: " << TriangleWidth << " Height: " << TriangleHeight << " HYP: " << sqrt(TriangleWidth * TriangleWidth + TriangleHeight * TriangleHeight) << " Theta: " << glm::degrees(Theta) << "\n";
-
-		//std::cout << "SinTheta = " << sin(Theta) << " CosTheta = " << cos(Theta) << "\n";
-
-		//float xAcceleration = m_pLootCrate->Mass * m_pLootCrate->Gravity * cos(Theta);
-		//std::cout << "Acceleration X = mgcos(theta): " << xAcceleration << "\n";
-
-		//float yAcceleration = m_pLootCrate->Mass * m_pLootCrate->Gravity * sin(Theta);
-		//std::cout << "Acceleration Y = mgsin(theta): " << yAcceleration << "\n";
-
-		/*if (AddFriction)
-		{
-			xAcceleration = m_pLootCrate->Mass * m_pLootCrate->Gravity * cos(Theta) - Friction * m_pLootCrate->Mass * m_pLootCrate->Gravity * cos(Theta);
-			yAcceleration = m_pLootCrate->Mass * m_pLootCrate->Gravity * sin(Theta) - Friction * m_pLootCrate->Mass * m_pLootCrate->Gravity * sin(Theta);
-			//std::cout << "DEBUG: X: " << xAcceleration << " Y: " << yAcceleration << "\n";
-		}*/
-
-		if (!AddFriction) Friction = 0.0f;
-
-		float xAcceleration = 
-			m_pLootCrate->Mass * m_pLootCrate->Gravity * cos(Theta) - Friction * m_pLootCrate->Mass * m_pLootCrate->Gravity * cos(Theta);
-
-		float yAcceleration = 
-			m_pLootCrate->Mass * m_pLootCrate->Gravity * sin(Theta) - Friction * m_pLootCrate->Mass * m_pLootCrate->Gravity * sin(Theta);
-		
-		m_pLootCrate->getRigidBody()->acceleration = glm::vec2(xAcceleration, yAcceleration);
 		m_pLootCrate->doesUpdate = true;
 	}
 
@@ -184,6 +184,11 @@ void PlayScene::GUI_Function()
 		m_pLootCrate->getRigidBody()->velocity = glm::vec2(0.0f, 0.0f);
 		m_pLootCrate->getRigidBody()->acceleration = glm::vec2(0.0f, 0.0f);
 		SetText();
+	}
+
+	if (ImGui::Button("Pause"))
+	{
+		m_pLootCrate->doesUpdate = false;
 	}
 
 	if (ImGui::SliderFloat("Position", &TrianglePosX, 0.0f, Config::SCREEN_WIDTH) && !m_pLootCrate->doesUpdate)
@@ -202,42 +207,6 @@ void PlayScene::GUI_Function()
 		ImGui::SliderFloat("Friction", &Friction, 0.0f, 0.999f);
 	}
 
-	/*if (ImGui::Button("Play"))
-	{
-		glm::vec2 DegreeToVector;
-		if (m_pLootCrate->calculateTheta)
-		{
-			glm::vec2 distance = StormTrooperPos.x - m_pLootCrate->getTransform()->position;
-
-			float gravityByDistance = m_pLootCrate->Gravity.y * distance.x;
-			float Equation = gravityByDistance / (Speed * Speed);
-			float theta = 0.5 * glm::degrees(asin(Equation));
-
-			std::cout << "DIST: " << distance.x << " THETA: " << theta << "\n";
-
-			float cosTheta = cos(glm::radians(theta));
-			float sinTheta = sin(glm::radians(theta));
-
-			DegreeToVector = glm::vec2(cosTheta, -sinTheta);
-		}
-		else DegreeToVector = glm::vec2(cos(m_pLootCrate->throwAngle), -sin(m_pLootCrate->throwAngle));
-
-		std::cout << "Degree to vector: " << DegreeToVector.x << " y: " << DegreeToVector.y << "\n";
-		m_pLootCrate->getRigidBody()->velocity = DegreeToVector * Speed;
-		m_pLootCrate->doesUpdate = true;
-		
-	}
-
-	if (ImGui::Button("Reset"))
-	{
-		m_pLootCrate->doesUpdate = false;
-		m_pLootCrate->getTransform()->position = glm::vec2(125.0f, 400.0f);
-		m_pLootCrate->getRigidBody()->velocity = glm::vec2(0.0f, 0.0f);
-		m_pLootCrate->getRigidBody()->acceleration = glm::vec2(0.0f, 0.0f);
-
-		SetText();
-	}*/
-
 	ImGui::Separator();
 
 	ImGui::End();
@@ -252,11 +221,13 @@ void PlayScene::SetTriangle()
 	Triangle[1] = glm::vec2(TrianglePosX + TriangleWidth, TrianglePosY);
 	Triangle[2] = glm::vec2(TrianglePosX, TrianglePosY - TriangleHeight);
 
-	float hypotenuse = sqrt(TriangleWidth * TriangleWidth + TriangleHeight * TriangleHeight);
-	Theta = asin(TriangleHeight / hypotenuse);
+	Theta = atan(TriangleHeight / TriangleWidth);
 
 	m_pLootCrate->Rotation = glm::degrees(Theta);
-	m_pLootCrate->getTransform()->position = glm::vec2(Triangle[2].x + m_pLootCrate->getWidth() / 2.5f, Triangle[2].y - m_pLootCrate->getHeight() / 2.5f);
+	std::cout << "x: " << Triangle[2].x + m_pLootCrate->getWidth() / 2.5f << " y: " << Triangle[2].y - m_pLootCrate->getHeight() / 2.5f << "\n";
+
+	m_pLootCrate->getTransform()->position = 
+		glm::vec2(Triangle[2].x + m_pLootCrate->getWidth() / 2.5f, Triangle[2].y - m_pLootCrate->getHeight() / 2.5f);
 
 	SetText();
 }
