@@ -121,7 +121,7 @@ void PlayScene::start()
 	
 	// Back Button
 	m_pBackButton = new Button("../Assets/textures/backButton.png", "backButton", BACK_BUTTON);
-	m_pBackButton->getTransform()->position = glm::vec2(300.0f, 500.0f);
+	m_pBackButton->getTransform()->position = glm::vec2(500.0f, 700.0f);
 	m_pBackButton->addEventListener(CLICK, [&]()-> void
 	{
 		m_pBackButton->setActive(false);
@@ -141,7 +141,7 @@ void PlayScene::start()
 
 	// Next Button
 	m_pNextButton = new Button("../Assets/textures/nextButton.png", "nextButton", NEXT_BUTTON);
-	m_pNextButton->getTransform()->position = glm::vec2(500.0f, 500.0f);
+	m_pNextButton->getTransform()->position = glm::vec2(700.0f, 700.0f);
 	m_pNextButton->addEventListener(CLICK, [&]()-> void
 	{
 		m_pNextButton->setActive(false);
@@ -161,8 +161,8 @@ void PlayScene::start()
 	addChild(m_pNextButton);
 
 	/* Instructions Label */
-	m_pInstructionsLabel = new Label("Press the grave accent (`) to toggle Debug View", "Consolas", 20.0f, { 255, 255, 255, 255 });
-	m_pInstructionsLabel->getTransform()->position = glm::vec2(Config::SCREEN_WIDTH * 0.5f, 550.0f);
+	m_pInstructionsLabel = new Label("Press the grave accent (`) to toggle Debug View", "Consolas", 20.0f, { 0, 0, 255, 255 });
+	m_pInstructionsLabel->getTransform()->position = glm::vec2(Config::SCREEN_WIDTH * 0.5f, 750.0f);
 
 	addChild(m_pInstructionsLabel);
 }
@@ -199,6 +199,9 @@ void PlayScene::GUI_Function()
 
 	if (ImGui::SliderFloat("Ramp Width", &TriangleWidth, 0.0f, 400.0f) && !m_pLootCrate->doesUpdate)
 		SetTriangle();
+
+	if (ImGui::SliderFloat("Mass (Kg)", &m_pLootCrate->Mass, 1.0f, 100.0f) && !m_pLootCrate->doesUpdate)
+		SetText();
 
 	ImGui::Checkbox("Add friction?", &AddFriction);
 
