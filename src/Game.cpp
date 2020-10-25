@@ -42,23 +42,18 @@ bool Game::init(const char* title, const int x, const int y, const int width, co
 	// initialize SDL
 	if (SDL_Init(SDL_INIT_EVERYTHING) >= 0)
 	{
-		std::cout << "SDL Init success" << std::endl;
-
 		// if succeeded create our window
 		m_pWindow = (Config::make_resource(SDL_CreateWindow(title, x, y, width, height, flags)));
 		
 		// if window creation successful create our renderer
 		if (m_pWindow != nullptr)
 		{
-			std::cout << "window creation success" << std::endl;
-
 			// create a new SDL Renderer and store it in the Singleton
 			const auto renderer = (Config::make_resource(SDL_CreateRenderer(m_pWindow.get(), -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC)));
 			Renderer::Instance()->setRenderer(renderer);
 			
 			if (Renderer::Instance()->getRenderer() != nullptr) // render init success
 			{
-				std::cout << "renderer creation success" << std::endl;
 				SDL_SetRenderDrawColor(Renderer::Instance()->getRenderer(), 255, 255, 255, 255);
 			}
 			else
@@ -92,8 +87,6 @@ bool Game::init(const char* title, const int x, const int y, const int width, co
 		std::cout << "SDL init failure" << std::endl;
 		return false; //SDL could not intialize
 	}
-
-	std::cout << "init success" << std::endl;
 	m_bRunning = true; // everything initialized successfully - start the main loop
 
 	return true;
@@ -135,11 +128,8 @@ void Game::changeSceneState(const SceneState new_state)
 		if (m_currentSceneState != NO_SCENE) 
 		{
 			m_currentScene->clean();
-			std::cout << "cleaning previous scene" << std::endl;
 			FontManager::Instance()->clean();
-			std::cout << "cleaning FontManager" << std::endl;
 			TextureManager::Instance()->clean();
-			std::cout << "cleaning TextureManager" << std::endl;
 		}
 
 		m_currentScene = nullptr;
@@ -152,18 +142,11 @@ void Game::changeSceneState(const SceneState new_state)
 		{
 		case START_SCENE:
 			m_currentScene = new StartScene();
-			std::cout << "start scene activated" << std::endl;
 			break;
 		case PLAY_SCENE:
 			m_currentScene = new PlayScene();
-			std::cout << "play scene activated" << std::endl;
-			break;
-		case END_SCENE:
-			m_currentScene = new EndScene();
-			std::cout << "end scene activated" << std::endl;
 			break;
 		default:
-			std::cout << "default case activated" << std::endl;
 			break;
 		}
 	}
@@ -191,7 +174,6 @@ void Game::update() const
 
 void Game::clean() const
 {
-	std::cout << "cleaning game" << std::endl;
 
 	// Clean Up for IMGUI
 	ImGui::DestroyContext();

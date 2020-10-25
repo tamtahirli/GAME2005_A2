@@ -14,11 +14,11 @@ StartScene::~StartScene()
 
 void StartScene::draw()
 {
-	TextureManager::Instance()->draw("background", 300.0f, 400.0f, 0, 255, true);
+	TextureManager::Instance()->draw("background", 300.0f, 150.0f, 0, 255, true);
 	drawDisplayList();
 
 	// DEBUG PURPOSES
-	TheGame::Instance()->changeSceneState(PLAY_SCENE);
+	//TheGame::Instance()->changeSceneState(PLAY_SCENE);
 }
 
 void StartScene::update()
@@ -50,27 +50,26 @@ void StartScene::handleEvents()
 void StartScene::start()
 {
 	// Create background
-	TextureManager::Instance()->load("../Assets/textures/background.png", "background");
+	TextureManager::Instance()->load("../Assets/textures/background.jpg", "background");
 
-	const SDL_Color green = { 0, 100, 0, 255 };
-	const SDL_Color red = { 200, 0, 0, 255 };
-	const SDL_Color cyan = { 0, 200, 200, 255 };
+	const SDL_Color green = { 0, 255, 0, 255 };
+	const SDL_Color cyan = { 0, 255, 255, 255 };
 
-	m_pStartLabel = new Label("Ramp Simulation", "Consolas", 60, red, glm::vec2(400.0f, 40.0f));
+	m_pStartLabel = new Label("Ramp Simulation", "Dock51", 60, cyan, glm::vec2(Config::SCREEN_WIDTH / 2, 250.0f));
 	m_pStartLabel->setParent(this);
 	addChild(m_pStartLabel);
 
-	m_pGroupMemberLabel = new Label("Tamerlan Tahirli - 101055392 -- Alexander Barnes - 101086806", "Consolas", 20, cyan, glm::vec2(400.0f, 130.0f));
+	m_pGroupMemberLabel = new Label("Tamerlan Tahirli - 101055392 -- Alexander Barnes - 101086806", "Consolas", 20, cyan, glm::vec2(Config::SCREEN_WIDTH / 2, 300.0f));
 	m_pGroupMemberLabel->setParent(this);
 	addChild(m_pGroupMemberLabel);
 
-	m_pInstructionsLabel = new Label("Press Start or 1 to Play", "Consolas", 40, green, glm::vec2(400.0f, 200.0f));
+	m_pInstructionsLabel = new Label("Press start or 1 to begin", "Consolas", 40, green, glm::vec2(Config::SCREEN_WIDTH / 2, 400.0f));
 	m_pInstructionsLabel->setParent(this);
 	addChild(m_pInstructionsLabel);
 
 	// Start Button
 	m_pStartButton = new Button();
-	m_pStartButton->getTransform()->position = glm::vec2(400.0f, 400.0f);
+	m_pStartButton->getTransform()->position = glm::vec2(Config::SCREEN_WIDTH / 2, 600.0f);
 
 
 	m_pStartButton->addEventListener(CLICK, [&]()-> void

@@ -14,7 +14,7 @@ EndScene::~EndScene()
 
 void EndScene::draw()
 {
-	TextureManager::Instance()->draw("background", 300.0f, 400.0f, 0, 255, true);
+	TextureManager::Instance()->draw("background", 300.0f, 150.0f, 0, 255, true);
 	drawDisplayList();
 }
 
@@ -49,9 +49,9 @@ void EndScene::handleEvents()
 
 void EndScene::start()
 {
-	TextureManager::Instance()->load("../Assets/textures/background.png", "background");
+	TextureManager::Instance()->load("../Assets/textures/background.jpg", "background");
 	const SDL_Color blue = { 0, 0, 255, 255 };
-	m_label = new Label("END SCENE", "Dock51", 80, blue, glm::vec2(400.0f, 40.0f));
+	m_label = new Label("End of simulation", "Dock51", 80, blue, glm::vec2(400.0f, 40.0f));
 	m_label->setParent(this);
 	addChild(m_label);
 

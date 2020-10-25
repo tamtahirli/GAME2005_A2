@@ -18,7 +18,7 @@ PlayScene::~PlayScene()
 
 void PlayScene::draw()
 {
-	TextureManager::Instance()->draw("background", 300.0f, 400.0f, 0, 255, true);
+	TextureManager::Instance()->draw("background", 300.0f, 150.0f, 0, 255, true);
 
 	Util::DrawLine(Triangle[0], Triangle[1]);
 	Util::DrawLine(Triangle[1], Triangle[2]);
@@ -49,20 +49,23 @@ void PlayScene::update()
 		float yAcceleration =
 			m_pLootCrate->Mass * m_pLootCrate->Gravity * sin(Theta);
 
+
 		if (m_pLootCrate->getTransform()->position.y >= Triangle[1].y - m_pLootCrate->getHeight() / 2)
 		{
 			Theta = 0.0f;
-			yAcceleration = 0.0f;
+			yAcceleration = 0.0f; // mg - n
+			m_pLootCrate->Rotation = Theta;
 			m_pLootCrate->getRigidBody()->velocity.y = 0.0f;
-			m_pLootCrate->Rotation = 0.0f;
-			xAcceleration = -(Friction * m_pLootCrate->Mass * m_pLootCrate->Gravity);
+
+			xAcceleration = -Friction * m_pLootCrate->Mass * m_pLootCrate->Gravity; // -f * mg
+
 			if (m_pLootCrate->getRigidBody()->velocity.x <= 0)
 			{
+				// Come to a complete stop
 				xAcceleration = 0.0f;
 				m_pLootCrate->getRigidBody()->velocity.x = 0.0f;
 			}
 		}
-
 
 		m_pLootCrate->getRigidBody()->acceleration = glm::vec2(xAcceleration, yAcceleration);
 	}
@@ -98,7 +101,7 @@ void PlayScene::handleEvents()
 
 void PlayScene::start()
 {
-	TextureManager::Instance()->load("../Assets/textures/background.png", "background");
+	TextureManager::Instance()->load("../Assets/textures/background.jpg", "background");
 
 	// Set GUI Title
 	m_guiTitle = "Play Scene";
@@ -107,7 +110,7 @@ void PlayScene::start()
 	TriangleWidth = 400.0f;
 	TriangleHeight = 300.0f;
 	TrianglePosX = 150.0f;
-	TrianglePosY = 400.0f;
+	TrianglePosY = 600.0f;
 
 	m_pLootCrate = new LootCrate();
 	m_pLootCrate->Mass = 12.8f; // 12.8 kg mass
@@ -121,7 +124,7 @@ void PlayScene::start()
 	
 	// Back Button
 	m_pBackButton = new Button("../Assets/textures/backButton.png", "backButton", BACK_BUTTON);
-	m_pBackButton->getTransform()->position = glm::vec2(500.0f, 700.0f);
+	m_pBackButton->getTransform()->position = glm::vec2(Config::SCREEN_WIDTH / 2, 700.0f);
 	m_pBackButton->addEventListener(CLICK, [&]()-> void
 	{
 		m_pBackButton->setActive(false);
@@ -139,30 +142,9 @@ void PlayScene::start()
 	});
 	addChild(m_pBackButton);
 
-	// Next Button
-	m_pNextButton = new Button("../Assets/textures/nextButton.png", "nextButton", NEXT_BUTTON);
-	m_pNextButton->getTransform()->position = glm::vec2(700.0f, 700.0f);
-	m_pNextButton->addEventListener(CLICK, [&]()-> void
-	{
-		m_pNextButton->setActive(false);
-		TheGame::Instance()->changeSceneState(END_SCENE);
-	});
-
-	m_pNextButton->addEventListener(MOUSE_OVER, [&]()->void
-	{
-		m_pNextButton->setAlpha(128);
-	});
-
-	m_pNextButton->addEventListener(MOUSE_OUT, [&]()->void
-	{
-		m_pNextButton->setAlpha(255);
-	});
-
-	addChild(m_pNextButton);
-
 	/* Instructions Label */
-	m_pInstructionsLabel = new Label("Press the grave accent (`) to toggle Debug View", "Consolas", 20.0f, { 0, 0, 255, 255 });
-	m_pInstructionsLabel->getTransform()->position = glm::vec2(Config::SCREEN_WIDTH * 0.5f, 750.0f);
+	m_pInstructionsLabel = new Label("Press the grave accent (`) to toggle simulation menu", "Consolas", 20.0f, { 0, 255, 0, 255 });
+	m_pInstructionsLabel->getTransform()->position = glm::vec2(Config::SCREEN_WIDTH / 2, 750.0f);
 
 	addChild(m_pInstructionsLabel);
 }
@@ -227,7 +209,6 @@ void PlayScene::SetTriangle()
 	Theta = atan(TriangleHeight / TriangleWidth);
 
 	m_pLootCrate->Rotation = glm::degrees(Theta);
-	std::cout << "x: " << Triangle[2].x + m_pLootCrate->getWidth() / 2.5f << " y: " << Triangle[2].y - m_pLootCrate->getHeight() / 2.5f << "\n";
 
 	m_pLootCrate->getTransform()->position = 
 		glm::vec2(Triangle[2].x + m_pLootCrate->getWidth() / 2.5f, Triangle[2].y - m_pLootCrate->getHeight() / 2.5f);
@@ -244,13 +225,13 @@ void PlayScene::SetText()
 	Text = "Position (x, y): (" + std::to_string(m_pLootCrate->getTransform()->position.x) + ", " + std::to_string(m_pLootCrate->getTransform()->position.y) + ")";
 	PositionLabel->setText(Text);
 
-	Text = "Velocity: " + std::to_string(Util::magnitude(m_pLootCrate->getRigidBody()->velocity));
+	Text = "Velocity (x, y): (" + std::to_string(m_pLootCrate->getRigidBody()->velocity.x) + ", " + std::to_string(m_pLootCrate->getRigidBody()->velocity.y) + ")";
 	VelocityLabel->setText(Text);
 
-	Text = "Acceleration: " + std::to_string(Util::magnitude(m_pLootCrate->getRigidBody()->acceleration));
+	Text = "Acceleration (x, y): (" + std::to_string(m_pLootCrate->getRigidBody()->acceleration.x) + ", " + std::to_string(m_pLootCrate->getRigidBody()->acceleration.y) + ")";
 	AccelerationLabel->setText(Text);
 
-	Text = "Force: " + std::to_string(Util::magnitude(m_pLootCrate->Force));
+	Text = "Force: " + std::to_string(m_pLootCrate->Mass * m_pLootCrate->getRigidBody()->acceleration.x) + " N";
 	ForceLabel->setText(Text);
 
 	Text = "Theta: " + std::to_string(glm::degrees(Theta));
@@ -259,7 +240,7 @@ void PlayScene::SetText()
 
 void PlayScene::CreateLabels()
 {
-	const SDL_Color green = { 0, 100, 0, 255 };
+	const SDL_Color green = { 0, 255, 0, 255 };
 
 	std::string Text = "";
 	Text = "Mass: " + std::to_string(m_pLootCrate->Mass);
@@ -272,17 +253,17 @@ void PlayScene::CreateLabels()
 	PositionLabel->setParent(this);
 	addChild(PositionLabel);
 
-	Text = "Velocity: " + std::to_string(Util::magnitude(m_pLootCrate->getRigidBody()->velocity));
-	VelocityLabel = new Label(Text, "Consolas", 15, green, glm::vec2(100.0f, 50.0f));
+	Text = "Velocity (x, y): (" + std::to_string(m_pLootCrate->getRigidBody()->velocity.x) + ", " + std::to_string(m_pLootCrate->getRigidBody()->velocity.y) + ")";
+	VelocityLabel = new Label(Text, "Consolas", 15, green, glm::vec2(175.0f, 50.0f));
 	VelocityLabel->setParent(this);
 	addChild(VelocityLabel);
 
-	Text = "Acceleration: " + std::to_string(Util::magnitude(m_pLootCrate->getRigidBody()->acceleration));
-	AccelerationLabel = new Label(Text, "Consolas", 15, green, glm::vec2(100.0f, 75.0f));
+	Text = "Acceleration (x, y): (" + std::to_string(m_pLootCrate->getRigidBody()->acceleration.x) + ", " + std::to_string(m_pLootCrate->getRigidBody()->acceleration.y) + ")";
+	AccelerationLabel = new Label(Text, "Consolas", 15, green, glm::vec2(175.0f, 75.0f));
 	AccelerationLabel->setParent(this);
 	addChild(AccelerationLabel);
 
-	Text = "Force: " + std::to_string(Util::magnitude(m_pLootCrate->Force));
+	Text = "Force: " + std::to_string(m_pLootCrate->Mass * m_pLootCrate->getRigidBody()->acceleration.x) + " N";
 	ForceLabel = new Label(Text, "Consolas", 15, green, glm::vec2(100.0f, 125.0f));
 	ForceLabel->setParent(this);
 	addChild(ForceLabel);
