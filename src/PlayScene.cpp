@@ -23,6 +23,8 @@ void PlayScene::draw()
 	Util::DrawLine(Triangle[0], Triangle[1]);
 	Util::DrawLine(Triangle[1], Triangle[2]);
 	Util::DrawLine(Triangle[2], Triangle[0]);
+
+	// This makes the slope at the bottom, size of x position + 600
 	Util::DrawLine(Triangle[0], glm::vec2(Triangle[0].x + 600.0f, Triangle[0].y));
 
 	if (m_pLootCrate->doesUpdate)
@@ -49,6 +51,29 @@ void PlayScene::update()
 		float yAcceleration =
 			m_pLootCrate->Mass * m_pLootCrate->Gravity * sin(Theta);
 
+		float length = sqrt(TriangleWidth * TriangleWidth + TriangleHeight * TriangleHeight);
+		float finalVelocity = sqrt(2 * yAcceleration * length);
+
+		/*
+		
+		Does not look accurate, removed:
+
+		if (m_pLootCrate->getRigidBody()->velocity.x >= finalVelocity)
+		{
+			Theta = 0.0f;
+			yAcceleration = 0.0f; // mg - n
+			m_pLootCrate->Rotation = Theta;
+			m_pLootCrate->getRigidBody()->velocity.y = 0.0f;
+
+			xAcceleration = -Friction * m_pLootCrate->Mass * m_pLootCrate->Gravity; // -f * mg
+
+			if (m_pLootCrate->getRigidBody()->velocity.x <= 0)
+			{
+				// Come to a complete stop
+				xAcceleration = 0.0f;
+				m_pLootCrate->getRigidBody()->velocity.x = 0.0f;
+			}
+		}*/
 
 		if (m_pLootCrate->getTransform()->position.y >= Triangle[1].y - m_pLootCrate->getHeight() / 2)
 		{
